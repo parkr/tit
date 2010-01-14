@@ -154,24 +154,32 @@ def show_tit status
   puts ""
 end
 
-def poll wait, action
+def poll wait, action, notify
   tits = {}
   get_tits(action).reverse.each do |status|
     show_tit status
     tits[status[:id]] = status
   end
+  last_update = Time.now()
   loop do
-    sleep(wait)
+    print "\r", " " * (s = "Last update was at #{last_update.strftime "%X"}, " +
+                       "next update at #{(last_update + wait).strftime "%X"}"
+                       print s
+                       STDOUT.flush
+                       sleep wait
+                       s.length), "\r"
     begin
-      get_tits(action).reverse.select do |status|
+      num_tits = get_tits(action).reverse.select do |status|
         not tits.include? status[:id]
       end.each_with_index do |status, i|
         if i == 0
-          puts "more updates:\n"
+          puts "more updates (at #{Time.now.strftime "%X"}):\n"
         end
         show_tit status
         tits[status[:id]] = status
-      end
+      end.length
+      %x[#{notify} '#{num_tits} new tits!'] unless notify.nil? or num_tits == 0
+      last_update = Time.now()
     rescue SocketError, Errno::ENETUNREACH, Errno::ETIMEDOUT, RestClient::Exception => e
       puts "networking error, will try again later"
     end
@@ -194,7 +202,8 @@ def main
   options = {
     :action => :home,
     :wait => nil,
-    :payload => nil
+    :payload => nil,
+    :notify => nil
   }
 
   $opts = OptionParser.new do |opts|
@@ -231,6 +240,14 @@ def main
     end
 
     opts.separator ""
+    opts.separator "Poll options:"
+
+    opts.on("-n", "--notify [PROG]",
+            "Send notifications using PROG (default: notify-send)") do |prog|
+      options[:notify] = prog || "notify-send"
+    end
+
+    opts.separator ""
     opts.separator "Update options:"
 
     opts.on("-G", "--geo LAT:LONG",
@@ -262,10 +279,13 @@ def main
   # check for option errors
   if $readers.include? options[:action]
     abort "cannot provide geotag when reading" unless options[:payload].nil?
+    abort "cannot notify unless polling" if (options[:wait].nil? and
+                                             not options[:notify].nil?)
   end
   if options[:action] == :update
     abort "need status message" unless options[:payload].include? "status"
     abort "can't repeatedly update status" unless options[:wait].nil?
+    abort "can't notify when updating status" unless options[:notify].nil?
   end
 
   # set up proxy
@@ -280,7 +300,7 @@ def main
       if options[:wait].nil?
         get_tits(options[:action]).reverse.each &method(:show_tit)
       else
-        poll options[:wait], options[:action]
+        poll options[:wait], options[:action], options[:notify]
       end
     elsif options[:action] == :update
       update options[:payload]
