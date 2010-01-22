@@ -1,0 +1,130 @@
+#!/usr/bin/env ruby
+
+require 'tit'
+
+def main
+  options = {
+    :debug => false,
+    :action => :home,
+    :wait => nil,
+    :payload => nil,
+    :notify => nil
+  }
+
+  tit = Tit.new
+
+  tit.opts = OptionParser.new do |opts|
+    opts.banner = "Usage: #{File.basename($0)} " +
+      "[options] [action [action options]]"
+
+    opts.separator ""
+    opts.separator "Actions:"
+
+    opts.on("-p", "--public", "Show public timeline") do
+      options[:action] = :public
+    end
+    opts.on("-H", "--home", "Show home timeline (default)") do
+      options[:action] = :home
+    end
+    opts.on("-m", "--mentions", "Show mentions timeline") do
+      options[:action] = :mentions
+    end
+    opts.on("-u", "--update [STATUS]",
+            "Update status (read from STDIN if none given)") do |status|
+      options[:action] = :update
+      options[:payload] ||= {}
+      options[:payload]["status"] = status || STDIN
+    end
+
+    opts.separator ""
+    opts.separator "Receive options (public/home/mentions):"
+
+    opts.on("-P", "--poll [N]",
+            "Poll for more updates every N secs (default 180)") do |secs|
+      options[:wait] = secs || '180'
+      options[:wait] = options[:wait].to_i
+      options[:wait] = 30 if options[:wait] < 30
+    end
+
+    opts.separator ""
+    opts.separator "Poll options:"
+
+    opts.on("-n", "--notify [PROG]",
+            "Send notifications using PROG (default: notify-send)") do |prog|
+      options[:notify] = prog || "notify-send"
+    end
+
+    opts.separator ""
+    opts.separator "Update options:"
+
+    opts.on("-G", "--geo LAT:LONG",
+            "Set latitude and longitude for update") do |s|
+      sp = s.split(/:/)
+
+      tit.abort("invalid geotag format: #{s}", opts) unless sp.length == 2
+
+      options[:payload] ||= {}
+      options[:payload]["lat"] = sp[0]
+      options[:payload]["long"] = sp[1]
+    end
+
+    opts.separator ""
+    opts.separator "Common options:"
+
+    opts.on("-d", "--debug", "Show debugging information") do
+      options[:debug] = true
+    end
+    opts.on_tail("-h", "--help", "Show this message") do
+      puts opts
+      exit
+    end
+  end
+
+  begin
+    tit.opts.parse!
+  rescue OptionParser::InvalidOption => e
+    tit.abort(e.message)
+  end
+
+  # check for option errors
+  if Tit::READERS.include? options[:action]
+    tit.abort("cannot provide geotag when reading") unless options[:payload].nil?
+    tit.abort("cannot notify unless polling") if (options[:wait].nil? and
+                                                  not options[:notify].nil?)
+  end
+  if options[:action] == :update
+    tit.abort("need status message") unless options[:payload].include? "status"
+    tit.abort("can't repeatedly update status") unless options[:wait].nil?
+    tit.abort("can't notify when updating status") unless options[:notify].nil?
+  end
+
+  # do it
+  if options[:debug]
+    begin
+      tit.run(options)
+    rescue SocketError, Errno::ENETUNREACH, Errno::ETIMEDOUT, RestClient::Exception => e
+      tit.error "got a networking error, are you connected to the intarbutts?"
+      puts e
+      exit(-1)
+    end
+  else
+    begin
+      tit.run(options)
+    rescue SocketError, Errno::ENETUNREACH, Errno::ETIMEDOUT, RestClient::Exception => e
+      tit.error "got a networking error, are you connected to the intarbutts?"
+      puts e
+      exit(-1)
+    rescue => e
+      tit.error "unknown error"
+      puts e
+      exit(-1)
+    end
+  end
+end
+
+begin
+  main
+rescue Interrupt
+  puts ""
+  exit(130)
+end
