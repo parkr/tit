@@ -1,3 +1,7 @@
+# tit 1.0.1 2010-01-22
+
+ * made even more spiteful in a few rather non-clever ways
+
 # tit 1.0.0 2010-01-22
 
  * can send and receive tits I mean tweets
