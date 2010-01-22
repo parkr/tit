@@ -58,7 +58,13 @@ def get_tits action
       :userid => xml.at_xpath("./user/screen_name").content,
       :text => xml.xpath("./text").map { |n| n.content },
       :timestamp => Time.parse(xml.at_xpath("./created_at").content),
-      :id => xml.at_xpath("./id").content.to_i
+      :id => xml.at_xpath("./id").content.to_i,
+      :geo => xml.at_xpath("./geo").instance_eval do
+          unless children.empty?
+            n, e = children[1].content.split.map { |s| s.to_f }
+            "#{n.abs}#{n >= 0 ? 'N' : 'S'} #{e.abs}#{e >= 0 ? 'E' : 'W'}"
+          end
+      end
     }
   end
 end
@@ -146,7 +152,12 @@ def show_tit status
          "you"
        else
          "#{status[:username]} (#{status[:userid]})"
-       end + " said, #{status[:timestamp].time_ago_in_words}:")
+       end + " said, #{status[:timestamp].time_ago_in_words}" +
+       unless status[:geo].nil?
+         ", from #{status[:geo]}:"
+       else
+         ":"
+       end)
 
   status[:text].each do |line|
     line.wrapped($cols - 2).each { |l| puts "  #{l}" }
