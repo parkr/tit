@@ -3,6 +3,11 @@ tit
 
 a stupid fucking twitter client for you and your stupid fucking friends
 
+install
+-------
+
+    $ (sudo) gem install tit
+
 usage
 -----
 
