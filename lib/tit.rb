@@ -71,6 +71,9 @@ class Time
   end
 end
 
+=begin rdoc
+Why are you reading the documentation, you cunt?
+=end
 class Tit
   RCFILE = File.join(ENV["HOME"], ".titrc")
 
