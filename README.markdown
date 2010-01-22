@@ -1,7 +1,8 @@
 tit
 ===
 
-a stupid fucking twitter client for you and your stupid fucking friends
+a rather spiteful stupid fucking twitter client for you and your stupid fucking
+friends
 
 install
 -------
