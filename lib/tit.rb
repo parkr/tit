@@ -103,6 +103,7 @@ class Tit
     begin
       @access_token = File.open(ATFILE, "r") do |at|
         params = YAML.load(at)
+        @userid = params[:screen_name]
         OAuth::AccessToken.from_hash(@consumer, params)
       end
     rescue Errno::ENOENT => e
@@ -176,7 +177,7 @@ class Tit
   end
 
   def show_tit(status)
-    person = if status[:userid].eql? @username
+    person = if status[:userid].eql? @userid
                "you"
              else
                "#{status[:username]} (#{status[:userid]})"

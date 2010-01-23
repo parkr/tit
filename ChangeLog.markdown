@@ -1,3 +1,7 @@
+# tit 1.1.1 2010-01-23
+
+ * fixed displaying yourself
+
 # tit 1.1.0 2010-01-23
 
  * moved to oauth for chris
