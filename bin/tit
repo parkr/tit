@@ -2,6 +2,8 @@
 
 require 'tit'
 
+require 'optparse'
+
 def main
   options = {
     :debug => false,
@@ -34,6 +36,10 @@ def main
       options[:action] = :update
       options[:payload] ||= {}
       options[:payload]["status"] = status || STDIN
+    end
+    opts.on("--pin PIN", ("Set auth pin if this is your first time playing " +
+                          "with this tit")) do |pin|
+      options[:pin] = pin
     end
 
     opts.separator ""
@@ -86,6 +92,12 @@ def main
     tit.abort(e.message)
   end
 
+  if options.include? :pin
+    tit.use_pin(options[:pin])
+  end
+
+  tit.get_access
+
   # check for option errors
   if Tit::READERS.include? options[:action]
     tit.abort("cannot provide geotag when reading") unless options[:payload].nil?
@@ -102,17 +114,23 @@ def main
   if options[:debug]
     begin
       tit.run(options)
-    rescue SocketError, Errno::ENETUNREACH, Errno::ETIMEDOUT, RestClient::Exception => e
+    rescue SocketError, Errno::ENETUNREACH, Errno::ETIMEDOUT => e
       tit.error "got a networking error, are you connected to the intarbutts?"
       puts e
+      exit(-1)
+    rescue NoMethodError
+      tit.error "might have gotten a networking error, check your intarbutts."
       exit(-1)
     end
   else
     begin
       tit.run(options)
-    rescue SocketError, Errno::ENETUNREACH, Errno::ETIMEDOUT, RestClient::Exception => e
+    rescue SocketError, Errno::ENETUNREACH, Errno::ETIMEDOUT => e
       tit.error "got a networking error, are you connected to the intarbutts?"
       puts e
+      exit(-1)
+    rescue NoMethodError
+      tit.error "might have gotten a networking error, check your intarbutts."
       exit(-1)
     rescue => e
       tit.error "unknown error"

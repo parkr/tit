@@ -3,8 +3,7 @@
 require 'rubygems'
 require 'ftools'
 require 'nokogiri'
-require 'optparse'
-require 'rest_client'
+require 'oauth/consumer'
 require 'time'  # heh.
 require 'yaml'
 
@@ -75,56 +74,76 @@ end
 Why are you reading the documentation, you cunt?
 =end
 class Tit
-  RCFILE = File.join(ENV["HOME"], ".titrc")
+  RTFILE = File.join(ENV["HOME"], ".titrt")
+  ATFILE = File.join(ENV["HOME"], ".titat")
 
   READERS = [:public, :home, :mentions]
   WRITERS = [:update]
 
   URLS = {
-    :public => "statuses/public_timeline.xml",
-    :home => "statuses/home_timeline.xml",
-    :mentions => "statuses/mentions.xml",
-    :update => "statuses/update.xml"
+    :public => "/statuses/public_timeline.xml",
+    :home => "/statuses/home_timeline.xml",
+    :mentions => "/statuses/mentions.xml",
+    :update => "/statuses/update.xml"
   }
 
+  KEY = "K2OOlWbQodfm4YV9Fmeg"
+  SECRET = "B1HuqK8zoDDLboRAWPqlHTFbLVdkQfquzoUC1MkuM"
+
   def initialize
-    @username = nil
-    @password = nil
-    begin
-      File.open(RCFILE, "r") do |rc|
-        data = YAML.load(rc)
-        @username = data["username"]
-        @password = data["password"]
-      end
-    rescue Errno::ENOENT => e
-      File.open(RCFILE, "w") do |rc|
-        YAML.dump({
-                    "username" => "<username>",
-                    "password" => "<password>"
-                  }, rc)
-      end
-    end
-
-    if @username.nil? or @username.eql? "<username>" or
-        @password.nil? or @password.eql? "<password>"
-      puts "Please fill in your username and password in #{RCFILE}"
-      exit(-1)
-    end
-
-    # set up proxy
-    RestClient.proxy = ENV['https_proxy']
+    @consumer = OAuth::Consumer.new(KEY, SECRET,
+                                    { :site => "https://twitter.com" })
 
     # get terminal width
     @cols = %x[tput cols].to_i
   end
   attr_accessor :opts
 
-  def resource
-    RestClient::Resource.new("https://#{@username}:#{@password}@twitter.com/")
+  def get_access
+    begin
+      @access_token = File.open(ATFILE, "r") do |at|
+        params = YAML.load(at)
+        OAuth::AccessToken.from_hash(@consumer, params)
+      end
+    rescue Errno::ENOENT => e
+      request_token = @consumer.get_request_token
+      File.open(RTFILE, "w") do |rt|
+        YAML.dump(request_token.params, rt)
+      end
+      tuts "Please visit '#{request_token.authorize_url}'."
+      tuts "When you finish, provide your pin with `tit --pin PIN'"
+      exit(0)
+    end
+  end
+
+  def use_pin(pin)
+    begin
+      request_token = File.open(RTFILE, "r") do |rt|
+        params = YAML.load(rt)
+        OAuth::RequestToken.from_hash(@consumer, params)
+      end
+    rescue Errno::ENOENT => e
+      tuts "You lost your old token, gotta try again."
+      get_access
+    end
+    begin
+      @access_token = request_token.get_access_token(:oauth_verifier => pin)
+    rescue OAuth::Unauthorized => e
+      tuts "Sorry, that's an old pin."
+      File.delete(RTFILE)
+      get_access
+    end
+    File.open(ATFILE, "w") do |at|
+      YAML.dump(@access_token.params, at)
+    end
+    File.delete(RTFILE)
+    tuts "Thanks, you're done with authentication."
+    tuts "Keep #{ATFILE} secure and intact.  If it's compromised, I can't " +
+      "revoke your token."
   end
 
   def get_tits(action)
-    Nokogiri.XML(resource[URLS[action]].get).xpath("//status").map do |xml|
+    Nokogiri.XML(@access_token.get(URLS[action]).body).xpath("//status").map do |xml|
       {
         :username => xml.at_xpath("./user/name").content,
         :userid => xml.at_xpath("./user/screen_name").content,
@@ -147,13 +166,13 @@ class Tit
     end
 
     if payload["status"].length > 140
-      puts "your status is too long (by #{payload["status"].length - 140} characters)"
-      puts "here is what would get posted:"
+      tuts "your status is too long (by #{payload["status"].length - 140} characters)"
+      tuts "here is what would get posted:"
       payload["status"][0...140].wrapped(@cols - 2).each { |l| puts "  #{l}" }
       exit(-1)
     end
 
-    resource[URLS[:update]].post(payload)
+    @access_token.post(URLS[:update], payload)
   end
 
   def show_tit(status)
@@ -164,9 +183,9 @@ class Tit
              end
     at = status[:timestamp].time_ago_in_words
     if status[:geo].nil?
-      puts "#{person} said, #{at}:"
+      tuts "#{person} said, #{at}:"
     else
-      puts "#{person} said, #{at}, from #{status[:geo]}:"
+      tuts "#{person} said, #{at}, from #{status[:geo]}:"
     end
 
     status[:text].each do |line|
@@ -194,15 +213,16 @@ class Tit
           tits.include? status[:id]
         end.each_with_index do |status, i|
           if i == 0
-            puts "more updates (at #{Time.now.strftime "%X"}):\n"
+            tuts "more updates (at #{Time.now.strftime "%X"}):"
+            puts ""
           end
           show_tit(status)
           tits[status[:id]] = status
         end.length
         %x[#{notify} '#{num_tits} new tit#{num_tits == 1 ? '' : 's'}!'] unless notify.nil? or num_tits == 0
         last_update = Time.now()
-      rescue SocketError, Errno::ENETUNREACH, Errno::ETIMEDOUT, RestClient::Exception => e
-        puts "networking error, will try again later"
+      rescue SocketError, Errno::ENETUNREACH, Errno::ETIMEDOUT, NoMethodError => e
+        tuts "networking error, will try again later"
       end
     end
   end
@@ -219,13 +239,17 @@ class Tit
     end
   end
 
-  def error msg
-    puts "#{File.basename $0}: #{msg}"
+  def tuts(*strs)
+    strs.each { |s| puts s.wrapped(@cols) }
   end
 
-  def abort msg
+  def error(msg)
+    tuts "#{File.basename $0}: #{msg}"
+  end
+
+  def abort(msg)
     error(msg)
-    puts @opts
+    tuts @opts
     exit(-1)
   end
 end

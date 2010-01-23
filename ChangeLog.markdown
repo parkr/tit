@@ -1,3 +1,7 @@
+# tit 1.1.0 2010-01-23
+
+ * moved to oauth for chris
+
 # tit 1.0.1 2010-01-22
 
  * made even more spiteful in a few rather non-clever ways
