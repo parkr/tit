@@ -1,3 +1,7 @@
+# tit 1.1.2 2010-01-26
+
+ * fixed a bug with update times and bad network connections
+
 # tit 1.1.1 2010-01-23
 
  * fixed displaying yourself
