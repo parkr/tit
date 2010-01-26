@@ -204,7 +204,7 @@ class Tit
     last_update = Time.now()
     loop do
       print "\r", " " * (s = "Last update was at #{last_update.strftime "%X"}, " +
-                         "next update at #{(last_update + wait).strftime "%X"}"
+                         "next update at #{(Time.now + wait).strftime "%X"}"
                          print s
                          STDOUT.flush
                          sleep(wait)
