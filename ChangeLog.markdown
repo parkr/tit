@@ -1,3 +1,7 @@
+# tit 1.1.3 2011-08-15
+
+ * fixed a bug - ftools sucks
+
 # tit 1.1.2 2010-01-26
 
  * fixed a bug with update times and bad network connections
