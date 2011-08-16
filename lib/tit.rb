@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'rubygems'
-require 'ftools'
+require 'fileutils'
 require 'nokogiri'
 require 'oauth/consumer'
 require 'time'  # heh.

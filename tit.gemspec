@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.email = %q{leif.walsh@gmail.com}
   s.executables = ["tit"]
   s.extra_rdoc_files = [
-    "ChangeLog.markdown",
+     "ChangeLog.markdown",
      "LICENSE",
      "README.markdown"
   ]
