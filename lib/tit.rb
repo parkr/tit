@@ -3,7 +3,7 @@
 require 'rubygems'
 require 'fileutils'
 require 'nokogiri'
-require 'oauth/consumer'
+require 'oauth'
 require 'time'  # heh.
 require 'yaml'
 
@@ -93,7 +93,6 @@ class Tit
   def initialize
     @consumer = OAuth::Consumer.new(KEY, SECRET,
                                     { :site => "https://twitter.com" })
-
     # get terminal width
     @cols = %x[tput cols].to_i
   end
