@@ -1,3 +1,8 @@
+# tit 1.2.3 2011-08-18
+
+* replace t.co urls with expanded urls.
+* fix for options parser
+
 # tit 1.2.2 2011-08-18
 
 * freaking &lt;3 all over the fucking twittersphere - decode that shit
