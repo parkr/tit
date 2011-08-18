@@ -91,21 +91,23 @@ end
 Why are you reading the documentation, you cunt?
 =end
 class Tit
-  VERSION = [1, 2, 4]
+  VERSION = [2, 0, 0]
   
   RCFILE = File.join(ENV["HOME"], ".titrc")
   RTFILE = File.join(ENV["HOME"], ".titrt")
   ATFILE = File.join(ENV["HOME"], ".titat")
 
-  READERS = [:public, :home, :mentions, :user_timeline]
-  WRITERS = [:update]
+  READERS = [:public, :home, :mentions, :user_timeline, :direct_messages]
+  WRITERS = [:update, :new_direct_message]
 
   URLS = {
     :public => "/statuses/public_timeline.xml",
     :home => "/statuses/home_timeline.xml",
     :mentions => "/statuses/mentions.xml",
     :user_timeline => "/statuses/user_timeline.xml",
-    :update => "/statuses/update.xml"
+    :update => "/statuses/update.xml",
+    :direct_messages => "/direct_messages.xml",
+    :new_direct_message => "/direct_messages/new.xml"
   }
 
   KEY = "K2OOlWbQodfm4YV9Fmeg"
@@ -176,8 +178,10 @@ class Tit
       api_endpoint.concat("?count=#{@prefs[:count]}")
     end
     api_endpoint.concat("&include_entities=true")
+    puts api_endpoint
     coder = HTMLEntities.new
     Nokogiri.XML(@access_token.get(api_endpoint).body).xpath("//status").map do |xml|
+      puts xml
       {
         :username => xml.at_xpath("./user/name").content,
         :userid => xml.at_xpath("./user/screen_name").content,
@@ -215,6 +219,17 @@ class Tit
     end
 
     @access_token.post(URLS[:update], payload)
+  end
+  
+  def send_dm(payload)
+    if payload["text"].length > 140
+      tuts "your message is too long (by #{payload["text"].length - 140} characters)"
+      tuts "here is what would get posted:"
+      payload["text"][0...140].wrapped(@cols - 2).each { |l| puts "  #{l}" }
+      exit(-1)
+    end
+    
+    @access_token.post(URLS[:new_direct_message], payload)
   end
 
   def show_tit(status)
@@ -278,6 +293,8 @@ class Tit
       end
     elsif options[:action] == :update
       update options[:payload]
+    elsif options[:action] == :new_direct_message
+      send_dm options[:payload]
     end
   end
   

@@ -48,6 +48,17 @@ def main
       options[:payload] ||= {}
       options[:payload]["status"] = status
     end
+    opts.on("-d", "--dm [USERNAME] [MESSAGE]", "Read direct messages. Send a direct message if USERNAME and MESSAGE are set") do |user, message|
+      unchanged = false
+      if not user.nil? and not message.nil?
+        options[:action] = :new_direct_message
+        options[:payload] ||= {}
+        options[:payload]["screen_name"] = user
+        options[:payload]["text"] = message
+      else
+        options[:action] = :direct_messages
+      end
+    end
     opts.on("--pin PIN", ("Set auth pin if this is your first time playing " +
                           "with this tit")) do |pin|
       unchanged = false
@@ -97,7 +108,7 @@ def main
       options[:debug] = true
     end
     
-    opts.on_tail("-c", "--count [NUM_STATUSES]", "Set number of statuses you see") do |count|
+    opts.on_tail("-c", "--count [NUM]", "Set number of statuses you see") do |count|
       unchanged = false
       tit.update_count(count)
     end
@@ -143,6 +154,11 @@ def main
   end
   if options[:action] == :update
     tit.abort("need status message") unless options[:payload].include? "status"
+    tit.abort("can't repeatedly update status") unless options[:wait].nil?
+    tit.abort("can't notify when updating status") unless options[:notify].nil?
+  end
+  if options[:action] == :new_direct_message
+    tit.abort("need message to send a dm") unless options[:payload].include? "message"
     tit.abort("can't repeatedly update status") unless options[:wait].nil?
     tit.abort("can't notify when updating status") unless options[:notify].nil?
   end
