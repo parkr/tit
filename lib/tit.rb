@@ -275,7 +275,7 @@ class Tit
 
   def abort(msg)
     error(msg)
-    tuts @opts
+    puts @opts
     exit(-1)
   end
 end
