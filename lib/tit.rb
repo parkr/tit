@@ -74,7 +74,7 @@ end
 Why are you reading the documentation, you cunt?
 =end
 class Tit
-  VERSION = [1, 2, 0]
+  VERSION = [1, 2, 1]
   
   RCFILE = File.join(ENV["HOME"], ".titrc")
   RTFILE = File.join(ENV["HOME"], ".titrt")

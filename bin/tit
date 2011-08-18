@@ -42,6 +42,12 @@ def main
       options[:payload] ||= {}
       options[:payload]["user"] = user
     end
+    opts.on("-t", "--tweet [STATUS]", "Update status (required when using -G)") do |status|
+      unchanged = false
+      options[:action] = :update
+      options[:payload] ||= {}
+      options[:payload]["status"] = status
+    end
     opts.on("--pin PIN", ("Set auth pin if this is your first time playing " +
                           "with this tit")) do |pin|
       unchanged = false
@@ -89,13 +95,6 @@ def main
     opts.on("-D", "--debug", "Show debugging information") do
       unchanged = false
       options[:debug] = true
-    end
-    
-    opts.on_tail("--update [STATUS]", "Update status") do |status|
-      unchanged = false
-      options[:action] = :update
-      options[:payload] ||= {}
-      options[:payload]["status"] = status
     end
     
     opts.on_tail("--count [NUM_STATUSES]", "Set number of statuses you see") do |count|

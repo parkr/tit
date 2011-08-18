@@ -1,3 +1,7 @@
+# tit 1.2.1 2011-08-18
+
+ * no longer using "-u" or "--update" for sending a tweet when other options exist - using "-t" or "--tweet"
+
 # tit 1.2.0 2011-08-18
 
  * ability to get user's timeline
