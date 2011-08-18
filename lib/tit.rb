@@ -180,7 +180,6 @@ class Tit
     api_endpoint.concat("&include_entities=true")
     coder = HTMLEntities.new
     Nokogiri.XML(@access_token.get(api_endpoint).body).xpath("//status").map do |xml|
-      puts xml
       {
         :username => xml.at_xpath("./user/name").content,
         :userid => xml.at_xpath("./user/screen_name").content,
