@@ -1,3 +1,7 @@
+# tit 1.2.5 2011-08-18
+
+* some freaky fixes that i don't remember
+
 # tit 1.2.4 2011-08-18
 
 * gave --count a short tag -c
