@@ -1,3 +1,7 @@
+# tit 1.2.4 2011-08-18
+
+* gave --count a short tag -c
+
 # tit 1.2.3 2011-08-18
 
 * replace t.co urls with expanded urls.

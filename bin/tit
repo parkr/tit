@@ -35,7 +35,7 @@ def main
       options[:action] = :mentions
       unchanged = false
     end
-    opts.on("-u", "--user [USER]",
+    opts.on("-u", "--user [USERNAME]",
             "Show a particular user's timeline") do |user|
       unchanged = false
       options[:action] = :user_timeline
@@ -97,7 +97,7 @@ def main
       options[:debug] = true
     end
     
-    opts.on_tail("--count [NUM_STATUSES]", "Set number of statuses you see") do |count|
+    opts.on_tail("-c", "--count [NUM_STATUSES]", "Set number of statuses you see") do |count|
       unchanged = false
       tit.update_count(count)
     end
