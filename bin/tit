@@ -115,18 +115,18 @@ def main
     end
     
   end
+
+  begin
+    tit.opts.parse!
+  rescue OptionParser::InvalidOption => e
+    tit.abort(e.message)
+  end
   
   # terribly hacky, but i can't figure out how OptionsParser handles no switches and just an argument. If it does at all.
   if(unchanged == true and ARGV[0])
     options[:action] = :update
     options[:payload] ||= {}
     options[:payload]["status"] = ARGV[0]
-  end
-
-  begin
-    tit.opts.parse!
-  rescue OptionParser::InvalidOption => e
-    tit.abort(e.message)
   end
 
   if options.include? :pin
