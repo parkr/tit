@@ -178,7 +178,6 @@ class Tit
       api_endpoint.concat("?count=#{@prefs[:count]}")
     end
     api_endpoint.concat("&include_entities=true")
-    puts api_endpoint
     coder = HTMLEntities.new
     Nokogiri.XML(@access_token.get(api_endpoint).body).xpath("//status").map do |xml|
       puts xml
