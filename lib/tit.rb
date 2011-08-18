@@ -9,6 +9,7 @@ require 'yaml'
 require 'htmlentities' # hate those &lt;3
 
 class String
+  URI_REGEX = %r"((?:(?:[^ :/?#]+):)(?://(?:[^ /?#]*))(?:[^ ?#]*)(?:\?(?:[^ #]*))?(?:#(?:[^ ]*))?)"
   def wrapped(cols)
     curlen = 0
     split.inject([[]]) do |rows, word|
@@ -20,6 +21,21 @@ class String
         rows << (rows.pop << word)
       end
     end.map { |row| row.join(' ') }
+  end
+  def replace_with_expanded_url! (expanded)
+    replace(replace_with_expanded_url(expanded))
+  end
+  def replace_with_expanded_url(expanded)
+    replace_uris(/http:\/\/t.co\/[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY0123456789]/, expanded)
+  end
+  def replace_uris(old, newt)
+    split(URI_REGEX).collect do |s|
+      if s =~ URI_REGEX
+        s.gsub(old, newt.join)
+      else
+        s
+      end
+    end.join
   end
 end
 
@@ -75,7 +91,7 @@ end
 Why are you reading the documentation, you cunt?
 =end
 class Tit
-  VERSION = [1, 2, 1]
+  VERSION = [1, 2, 3]
   
   RCFILE = File.join(ENV["HOME"], ".titrc")
   RTFILE = File.join(ENV["HOME"], ".titrt")
@@ -165,7 +181,15 @@ class Tit
       {
         :username => xml.at_xpath("./user/name").content,
         :userid => xml.at_xpath("./user/screen_name").content,
-        :text => xml.xpath("./text").map { |n| coder.decode(n.content) },
+        :text => xml.xpath("./text").map do |n|
+          txt = coder.decode(n.content)
+          if not xml.xpath("./entities/urls").nil?
+            xml.xpath("./entities/urls/url").map do |url| 
+              txt.replace_with_expanded_url! (url.xpath("./expanded_url").map { |expurl| expurl.content })
+            end
+          end
+          txt
+        end,
         :timestamp => Time.parse(xml.at_xpath("./created_at").content),
         :id => xml.at_xpath("./id").content.to_i,
         :geo => xml.at_xpath("./geo").instance_eval do

@@ -167,8 +167,9 @@ def main
       tit.error "got a networking error, are you connected to the intarbutts?"
       puts e
       exit(-1)
-    rescue NoMethodError
+    rescue NoMethodError => e
       tit.error "might have gotten a networking error, check your intarbutts."
+      puts e
       exit(-1)
     rescue => e
       tit.error "unknown error"
