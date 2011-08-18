@@ -1,3 +1,8 @@
+# tit 2.0.0 2011-08-18
+
+* added direct messaging
+* fixed a whole slew of bugs
+
 # tit 1.2.5 2011-08-18
 
 * some freaky fixes that i don't remember
