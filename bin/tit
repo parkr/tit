@@ -98,6 +98,11 @@ def main
       options[:payload]["status"] = status
     end
     
+    opts.on_tail("--count [NUM_STATUSES]", "Set number of statuses you see") do |count|
+      unchanged = false
+      tit.update_count(count)
+    end
+    
     opts.on_tail("-h", "--help", "Show this message") do
       unchanged = false
       puts opts

@@ -76,6 +76,7 @@ Why are you reading the documentation, you cunt?
 class Tit
   VERSION = [1, 1, 4]
   
+  RCFILE = File.join(ENV["HOME"], ".titrc")
   RTFILE = File.join(ENV["HOME"], ".titrt")
   ATFILE = File.join(ENV["HOME"], ".titat")
 
@@ -98,6 +99,8 @@ class Tit
                                     { :site => "https://twitter.com" })
     # get terminal width
     @cols = %x[tput cols].to_i
+    # get status count
+    @prefs = YAML.load_file(RCFILE)
   end
   attr_accessor :opts
 
@@ -112,6 +115,9 @@ class Tit
       request_token = @consumer.get_request_token
       File.open(RTFILE, "w") do |rt|
         YAML.dump(request_token.params, rt)
+      end
+      File.open(RCFILE, "w") do |rc|
+        YAML.dump({count: 10}, rc)
       end
       tuts "Please visit '#{request_token.authorize_url}'."
       tuts "When you finish, provide your pin with `tit --pin PIN'"
@@ -148,8 +154,11 @@ class Tit
   def get_tits(action, payload)
     api_endpoint = URLS[action]
     if(action == :user_timeline and not payload.nil?)
-      api_endpoint.concat("?screen_name=".concat(payload['user']))
+      api_endpoint.concat("?screen_name=".concat(payload['user'])).concat("?count=#{@prefs[:count]}")
+    else
+      api_endpoint.concat("?count=#{@prefs[:count]}")
     end
+    api_endpoint.concat("&include_entities=true")
     Nokogiri.XML(@access_token.get(api_endpoint).body).xpath("//status").map do |xml|
       {
         :username => xml.at_xpath("./user/name").content,
@@ -244,6 +253,14 @@ class Tit
     elsif options[:action] == :update
       update options[:payload]
     end
+  end
+  
+  def update_count(count)
+    @prefs[:count] = count
+    File.open(RCFILE, "w") do |rc|
+      YAML.dump(@prefs, rc)
+    end
+    exit(0)
   end
 
   def tuts(*strs)
