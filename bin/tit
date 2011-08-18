@@ -77,11 +77,17 @@ def main
     opts.separator ""
     opts.separator "Common options:"
 
-    opts.on("-d", "--debug", "Show debugging information") do
+    opts.on("-D", "--debug", "Show debugging information") do
       options[:debug] = true
     end
+    
     opts.on_tail("-h", "--help", "Show this message") do
       puts opts
+      exit
+    end
+    
+    opts.on_tail("-v", "--version", "Show version") do
+      puts ["v", Tit::VERSION.join('.')].join("")
       exit
     end
   end
