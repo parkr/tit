@@ -9,6 +9,7 @@ begin
     gemspec.authors = ["Leif Walsh", "Parker Moore"]
     gemspec.add_dependency('nokogiri', '>= 0')
     gemspec.add_dependency('oauth', '>= 0')
+    gemspec.add_dependency('htmlentities', '>= 0')
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError

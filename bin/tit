@@ -120,7 +120,7 @@ def main
   if(unchanged == true and ARGV[0])
     options[:action] = :update
     options[:payload] ||= {}
-    options[:payload]["status"] = ARGV[0] || STDIN
+    options[:payload]["status"] = ARGV[0]
   end
 
   begin

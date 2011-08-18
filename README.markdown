@@ -48,10 +48,11 @@ there's some more fucking options for you if you look at `tit -h`
 dependencies
 ------------
 
-[oauth][] and [nokogiri][]
+[oauth][] and [nokogiri][] and [htmlentities][]
 
 [oauth]: http://oauth.rubyforge.org/
 [nokogiri]: http://nokogiri.org/
+[htmlentities]: http://htmlentities.rubyforge.org/
 
 caveats
 -------

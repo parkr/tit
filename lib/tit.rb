@@ -6,6 +6,7 @@ require 'nokogiri'
 require 'oauth'
 require 'time'  # heh.
 require 'yaml'
+require 'htmlentities' # hate those &lt;3
 
 class String
   def wrapped(cols)
@@ -154,16 +155,17 @@ class Tit
   def get_tits(action, payload)
     api_endpoint = URLS[action]
     if(action == :user_timeline and not payload.nil?)
-      api_endpoint.concat("?screen_name=".concat(payload['user'])).concat("?count=#{@prefs[:count]}")
+      api_endpoint.concat("?screen_name=".concat(payload['user'])).concat("&count=#{@prefs[:count]}")
     else
       api_endpoint.concat("?count=#{@prefs[:count]}")
     end
     api_endpoint.concat("&include_entities=true")
+    coder = HTMLEntities.new
     Nokogiri.XML(@access_token.get(api_endpoint).body).xpath("//status").map do |xml|
       {
         :username => xml.at_xpath("./user/name").content,
         :userid => xml.at_xpath("./user/screen_name").content,
-        :text => xml.xpath("./text").map { |n| n.content },
+        :text => xml.xpath("./text").map { |n| coder.decode(n.content) },
         :timestamp => Time.parse(xml.at_xpath("./created_at").content),
         :id => xml.at_xpath("./id").content.to_i,
         :geo => xml.at_xpath("./geo").instance_eval do

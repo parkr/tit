@@ -1,3 +1,7 @@
+# tit 1.2.2 2011-08-18
+
+* freaking &lt;3 all over the fucking twittersphere - decode that shit
+
 # tit 1.2.1 2011-08-18
 
  * no longer using "-u" or "--update" for sending a tweet when other options exist - using "-t" or "--tweet"
