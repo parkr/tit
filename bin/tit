@@ -12,33 +12,39 @@ def main
     :payload => nil,
     :notify => nil
   }
+  unchanged = true
 
   tit = Tit.new
 
   tit.opts = OptionParser.new do |opts|
     opts.banner = "Usage: #{File.basename($0)} " +
-      "[options] [action [action options]]"
+      "[status] [options] [action [action options]]"
 
     opts.separator ""
     opts.separator "Actions:"
-
+    
     opts.on("-p", "--public", "Show public timeline") do
       options[:action] = :public
+      unchanged = false
     end
     opts.on("-H", "--home", "Show home timeline (default)") do
       options[:action] = :home
+      unchanged = false
     end
     opts.on("-m", "--mentions", "Show mentions timeline") do
       options[:action] = :mentions
+      unchanged = false
     end
-    opts.on("-u", "--update [STATUS]",
-            "Update status (read from STDIN if none given)") do |status|
-      options[:action] = :update
+    opts.on("-u", "--user [USER]",
+            "Show a particular user's timeline") do |user|
+      unchanged = false
+      options[:action] = :user_timeline
       options[:payload] ||= {}
-      options[:payload]["status"] = status || STDIN
+      options[:payload]["user"] = user || STDIN
     end
     opts.on("--pin PIN", ("Set auth pin if this is your first time playing " +
                           "with this tit")) do |pin|
+      unchanged = false
       options[:pin] = pin
     end
 
@@ -47,6 +53,7 @@ def main
 
     opts.on("-P", "--poll [N]",
             "Poll for more updates every N secs (default 180)") do |secs|
+      unchanged = false
       options[:wait] = secs || '180'
       options[:wait] = options[:wait].to_i
       options[:wait] = 30 if options[:wait] < 30
@@ -57,6 +64,7 @@ def main
 
     opts.on("-n", "--notify [PROG]",
             "Send notifications using PROG (default: notify-send)") do |prog|
+      unchanged = false
       options[:notify] = prog || "notify-send"
     end
 
@@ -65,6 +73,7 @@ def main
 
     opts.on("-G", "--geo LAT:LONG",
             "Set latitude and longitude for update") do |s|
+      unchanged = false
       sp = s.split(/:/)
 
       tit.abort("invalid geotag format: #{s}", opts) unless sp.length == 2
@@ -78,18 +87,36 @@ def main
     opts.separator "Common options:"
 
     opts.on("-D", "--debug", "Show debugging information") do
+      unchanged = false
       options[:debug] = true
     end
     
+    opts.on_tail("--update [STATUS]", "Update status") do |status|
+      unchanged = false
+      options[:action] = :update
+      options[:payload] ||= {}
+      options[:payload]["status"] = status
+    end
+    
     opts.on_tail("-h", "--help", "Show this message") do
+      unchanged = false
       puts opts
       exit
     end
     
     opts.on_tail("-v", "--version", "Show version") do
+      unchanged = false
       puts ["v", Tit::VERSION.join('.')].join("")
       exit
     end
+    
+    if(unchanged == true)
+      # terribly hacky, but i can't figure out how OptionsParser handles no switches and just an argument. If it does at all.
+      options[:action] = :update
+      options[:payload] ||= {}
+      options[:payload]["status"] = ARGV[0]
+    end
+    
   end
 
   begin
@@ -124,8 +151,9 @@ def main
       tit.error "got a networking error, are you connected to the intarbutts?"
       puts e
       exit(-1)
-    rescue NoMethodError
+    rescue NoMethodError => e
       tit.error "might have gotten a networking error, check your intarbutts."
+      puts e
       exit(-1)
     end
   else

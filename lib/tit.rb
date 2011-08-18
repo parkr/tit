@@ -79,13 +79,14 @@ class Tit
   RTFILE = File.join(ENV["HOME"], ".titrt")
   ATFILE = File.join(ENV["HOME"], ".titat")
 
-  READERS = [:public, :home, :mentions]
+  READERS = [:public, :home, :mentions, :user_timeline]
   WRITERS = [:update]
 
   URLS = {
     :public => "/statuses/public_timeline.xml",
     :home => "/statuses/home_timeline.xml",
     :mentions => "/statuses/mentions.xml",
+    :user_timeline => "/statuses/user_timeline.xml",
     :update => "/statuses/update.xml"
   }
 
@@ -145,7 +146,12 @@ class Tit
   end
 
   def get_tits(action)
-    Nokogiri.XML(@access_token.get(URLS[action]).body).xpath("//status").map do |xml|
+    api_endpoint = URLS[action]
+    puts api_endpoint
+    if(action == :user_timeline)
+      api_endpoint.concat("?screen_name=".concat(opts[:payload]['user']))
+    end
+    Nokogiri.XML(@access_token.get(api_endpoint).body).xpath("//status").map do |xml|
       {
         :username => xml.at_xpath("./user/name").content,
         :userid => xml.at_xpath("./user/screen_name").content,
