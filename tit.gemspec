@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.version = "1.1.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Leif Walsh"]
+  s.authors = ["Leif Walsh", "Parker Moore"]
   s.date = %q{2010-01-26}
   s.default_executable = %q{tit}
   s.description = %q{a stupid fucking twitter client}

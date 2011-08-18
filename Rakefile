@@ -6,7 +6,7 @@ begin
     gemspec.description = "a stupid fucking twitter client"
     gemspec.email = "leif.walsh@gmail.com"
     gemspec.homepage = "http://github.com/adlaiff6/tit"
-    gemspec.authors = ["Leif Walsh"]
+    gemspec.authors = ["Leif Walsh", "Parker Moore"]
     gemspec.add_dependency('nokogiri', '>= 0')
     gemspec.add_dependency('oauth', '>= 0')
   end
