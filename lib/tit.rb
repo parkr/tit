@@ -266,7 +266,7 @@ class Tit
   end
 
   def tuts(*strs)
-    strs.each { |s| puts s.wrapped(@cols) }
+    strs.each { |s| puts s.to_s.wrapped(@cols) }
   end
 
   def error(msg)
