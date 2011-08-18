@@ -145,11 +145,10 @@ class Tit
       "revoke your token."
   end
 
-  def get_tits(action)
+  def get_tits(action, payload)
     api_endpoint = URLS[action]
-    puts api_endpoint
-    if(action == :user_timeline)
-      api_endpoint.concat("?screen_name=".concat(opts[:payload]['user']))
+    if(action == :user_timeline and not payload.nil?)
+      api_endpoint.concat("?screen_name=".concat(payload['user']))
     end
     Nokogiri.XML(@access_token.get(api_endpoint).body).xpath("//status").map do |xml|
       {
@@ -238,7 +237,7 @@ class Tit
   def run(options)
     if READERS.include? options[:action]
       if options[:wait].nil?
-        get_tits(options[:action]).reverse.each &method(:show_tit)
+        get_tits(options[:action], options[:payload]).reverse.each &method(:show_tit)
       else
         poll(options[:wait], options[:action], options[:notify])
       end

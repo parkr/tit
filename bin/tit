@@ -40,7 +40,7 @@ def main
       unchanged = false
       options[:action] = :user_timeline
       options[:payload] ||= {}
-      options[:payload]["user"] = user || STDIN
+      options[:payload]["user"] = user
     end
     opts.on("--pin PIN", ("Set auth pin if this is your first time playing " +
                           "with this tit")) do |pin|
@@ -110,13 +110,13 @@ def main
       exit
     end
     
-    if(unchanged == true)
-      # terribly hacky, but i can't figure out how OptionsParser handles no switches and just an argument. If it does at all.
-      options[:action] = :update
-      options[:payload] ||= {}
-      options[:payload]["status"] = ARGV[0]
-    end
-    
+  end
+  
+  # terribly hacky, but i can't figure out how OptionsParser handles no switches and just an argument. If it does at all.
+  if(unchanged == true and ARGV[0])
+    options[:action] = :update
+    options[:payload] ||= {}
+    options[:payload]["status"] = ARGV[0] || STDIN
   end
 
   begin
@@ -132,7 +132,7 @@ def main
   tit.get_access
 
   # check for option errors
-  if Tit::READERS.include? options[:action]
+  if Tit::READERS.include? options[:action] and not options[:action].eql?(:user_timeline)
     tit.abort("cannot provide geotag when reading") unless options[:payload].nil?
     tit.abort("cannot notify unless polling") if (options[:wait].nil? and
                                                   not options[:notify].nil?)
