@@ -43,7 +43,7 @@ there's some more fucking options for you if you look at `tit -h`
 
 ### showing other people your tits ###
 
-    $ tit -u "look at my stupid fucking tweet" -G 88.918:-34.879
+    $ tit "look at my stupid fucking tweet" -G 88.918:-34.879
 
 dependencies
 ------------

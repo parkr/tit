@@ -1,3 +1,14 @@
+# tit 1.2.0 2011-08-18
+
+ * ability to get user's timeline
+ * tweet without using -u: just `tit 'tweet tweet'`
+ * user can now set number of tweets printed when requesting timelines
+
+# tit 1.1.4 2011-08-17
+
+ * moved debug from -d to -D
+ * added -v --version switch
+
 # tit 1.1.3 2011-08-15
 
  * fixed a bug - ftools sucks
