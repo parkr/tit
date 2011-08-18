@@ -4,7 +4,7 @@ begin
     gemspec.name = "tit"
     gemspec.summary = "stupid fucking twitter client"
     gemspec.description = "a stupid fucking twitter client"
-    gemspec.email = "leif.walsh@gmail.com"
+    gemspec.email = ["leif.walsh@gmail.com", "parkrmoore@gmail.com"]
     gemspec.homepage = "http://github.com/adlaiff6/tit"
     gemspec.authors = ["Leif Walsh", "Parker Moore"]
     gemspec.add_dependency('nokogiri', '>= 0')

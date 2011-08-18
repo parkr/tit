@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.date = %q{2010-01-26}
   s.default_executable = %q{tit}
   s.description = %q{a stupid fucking twitter client}
-  s.email = %q{leif.walsh@gmail.com}
+  s.email = [%q{leif.walsh@gmail.com}, %q{parkrmoore@gmail.com}]
   s.executables = ["tit"]
   s.extra_rdoc_files = [
      "ChangeLog.markdown",
