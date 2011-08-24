@@ -1,3 +1,7 @@
+# tit 2.0.1 2011-08-23
+
+* fixed bug with the count
+
 # tit 2.0.0 2011-08-18
 
 * added direct messaging

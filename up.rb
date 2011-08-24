@@ -13,12 +13,12 @@ else
   }
 end
 
-File.open("package.sh", "w") do |pkg|
+File.open("package", "w") do |pkg|
   add = "#! /bin/bash\n\ngem build tit.gemspec\ngem install -l tit-#{version[:new]}.gem\n"
   pkg.write(add)
 end
 
-File.open("tag.sh", "w") do |tag|
+File.open("tag", "w") do |tag|
   add = "#! /bin/bash\n\ngit tag -a v#{version[:new]} -m v#{version[:new]}\n"
   tag.write(add)
 end
@@ -36,7 +36,8 @@ File.open("lib/tit.rb2", "w+") do |spec|
   old = [sections[0].to_i, sections[2].to_i, sections[3].to_i]
   sections = version[:new].split(".")
   neew = [sections[0].to_i, sections[2].to_i, sections[3].to_i]
-  contents.gsub!("VERSION = \"#{old.to_s}\"", "VERSION = \"#{neew.to_s}\"")
+  puts "VERSION = #{old.to_s}"
+  contents.gsub!("VERSION = #{old.to_s}", "VERSION = #{neew.to_s}")
   spec.write(contents)
   FileUtils.mv "lib/tit.rb2", "lib/tit.rb"
 end

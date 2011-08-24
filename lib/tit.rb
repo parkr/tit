@@ -91,7 +91,7 @@ end
 Why are you reading the documentation, you cunt?
 =end
 class Tit
-  VERSION = [2, 0, 0]
+  VERSION = [2, 0, 1]
   
   RCFILE = File.join(ENV["HOME"], ".titrc")
   RTFILE = File.join(ENV["HOME"], ".titrt")
@@ -297,7 +297,8 @@ class Tit
   end
   
   def update_count(count)
-    @prefs[:count] = count
+    @prefs[:count] = count.to_i
+    @prefs["count"] = count.to_i
     File.open(RCFILE, "w") do |rc|
       YAML.dump(@prefs, rc)
     end
