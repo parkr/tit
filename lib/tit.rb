@@ -91,7 +91,7 @@ end
 Why are you reading the documentation, you cunt?
 =end
 class Tit
-  VERSION = [2, 0, 1]
+  VERSION = [2, 0, 2]
   
   RCFILE = File.join(ENV["HOME"], ".titrc")
   RTFILE = File.join(ENV["HOME"], ".titrt")
@@ -179,6 +179,7 @@ class Tit
     end
     api_endpoint.concat("&include_entities=true")
     coder = HTMLEntities.new
+    #puts @access_token.get(api_endpoint).body
     Nokogiri.XML(@access_token.get(api_endpoint).body).xpath("//status").map do |xml|
       {
         :username => xml.at_xpath("./user/name").content,

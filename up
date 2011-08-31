@@ -33,11 +33,11 @@ end
 File.open("lib/tit.rb2", "w+") do |spec|
   contents = IO.read("lib/tit.rb")
   sections = version[:old].split(".")
-  old = [sections[0].to_i, sections[2].to_i, sections[3].to_i]
+  old = [sections[0].to_i, sections[1].to_i, sections[2].to_i]
   sections = version[:new].split(".")
-  neew = [sections[0].to_i, sections[2].to_i, sections[3].to_i]
+  neew = [sections[0].to_i, sections[1].to_i, sections[2].to_i]
   puts "VERSION = #{old.to_s}"
-  contents.gsub!("VERSION = #{old.to_s}", "VERSION = #{neew.to_s}")
+  contents.gsub!("VERSION = [#{old[0]}, #{old[1]}, #{old[2]}]", "VERSION = #{neew.to_s}")
   spec.write(contents)
   FileUtils.mv "lib/tit.rb2", "lib/tit.rb"
 end

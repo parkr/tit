@@ -158,7 +158,7 @@ def main
     tit.abort("can't notify when updating status") unless options[:notify].nil?
   end
   if options[:action] == :new_direct_message
-    tit.abort("need message to send a dm") unless options[:payload].include? "message"
+    tit.abort("need message to send a dm") unless options[:payload].include? "text"
     tit.abort("can't repeatedly update status") unless options[:wait].nil?
     tit.abort("can't notify when updating status") unless options[:notify].nil?
   end
