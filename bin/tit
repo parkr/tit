@@ -49,6 +49,9 @@ def main
       options[:payload]["status"] = status
     end
     opts.on("-d", "--dm [USERNAME] [MESSAGE]", "Read direct messages. Send a direct message if USERNAME and MESSAGE are set") do |user, message|
+      "Tit does not presently have access to Twitter's Direct Messaging functionality. This will be rectified soon.".wrapped(@cols-2).each do |l|
+        puts " #{l}"
+      end
       unchanged = false
       if not user.nil? and not message.nil?
         options[:action] = :new_direct_message

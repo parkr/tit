@@ -1,10 +1,12 @@
+# tit 2.0.3 2011-08-31
+
+* print error message regarding no DM permissions
+* a couple patches
+
 # tit 2.0.2 2011-08-31
 
-* 
-
-# tit 2.0.2 2011-08-31
-
-* 
+* dm-ing still not working - twitter needs to give us permission
+* fixed code for dm-ing when twitter approves it, it'll work
 
 # tit 2.0.1 2011-08-23
 

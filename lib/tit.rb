@@ -91,7 +91,7 @@ end
 Why are you reading the documentation, you cunt?
 =end
 class Tit
-  VERSION = [2, 0, 2]
+  VERSION = [2, 0, 3]
   
   RCFILE = File.join(ENV["HOME"], ".titrc")
   RTFILE = File.join(ENV["HOME"], ".titrt")
@@ -210,6 +210,8 @@ class Tit
       payload["status"] = STDIN.read
     end
 
+    # Count URLs only as t.co length, not full length.
+
     if payload["status"].length > 140
       tuts "your status is too long (by #{payload["status"].length - 140} characters)"
       tuts "here is what would get posted:"
@@ -221,6 +223,7 @@ class Tit
   end
   
   def send_dm(payload)
+    # Count URLs only as t.co length, not full length.
     if payload["text"].length > 140
       tuts "your message is too long (by #{payload["text"].length - 140} characters)"
       tuts "here is what would get posted:"
