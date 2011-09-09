@@ -26,7 +26,7 @@ class String
     replace(replace_with_expanded_url(expanded))
   end
   def replace_with_expanded_url(expanded)
-    replace_uris(/http:\/\/t.co\/[abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXY0123456789]/, expanded)
+    replace_uris(/http:\/\/t.co\/[a-zA-Z0-9]{0,7}$/i, expanded)
   end
   def replace_uris(old, newt)
     split(URI_REGEX).collect do |s|
@@ -91,7 +91,7 @@ end
 Why are you reading the documentation, you cunt?
 =end
 class Tit
-  VERSION = [2, 0, 3]
+  VERSION = [2, 0, 4]
   
   RCFILE = File.join(ENV["HOME"], ".titrc")
   RTFILE = File.join(ENV["HOME"], ".titrt")

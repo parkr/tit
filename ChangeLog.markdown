@@ -1,3 +1,7 @@
+# tit 2.0.4 2011-09-09
+
+* fixes issue with replacing t.co urls, where the ridiculous set of chars at the end remained
+
 # tit 2.0.3 2011-08-31
 
 * print error message regarding no DM permissions
