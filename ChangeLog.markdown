@@ -1,3 +1,9 @@
+# tit 2.1.0 2011-09-10
+
+* got direct messaging working -- requires reauthorization
+* notifies user of need to reauthorize the app for dm permissions
+* can now handle missing tweet, whereas it was just throwing a Ruby error before
+
 # tit 2.0.4 2011-09-09
 
 * fixes issue with replacing t.co urls, where the ridiculous set of chars at the end remained
