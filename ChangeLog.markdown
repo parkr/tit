@@ -1,3 +1,7 @@
+# tit 2.1.6 2011-09-19
+
+* added preference as to whether t.co urls should be replaced with the expanded urls
+
 # tit 2.1.5 2011-09-12
 
 * some bug fixes and code restructuring

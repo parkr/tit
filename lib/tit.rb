@@ -91,7 +91,7 @@ end
 Why are you reading the documentation, you cunt?
 =end
 class Tit
-  VERSION = [2, 1, 5]
+  VERSION = [2, 1, 6]
   
   RCFILE = File.join(ENV["HOME"], ".titrc")
   RTFILE = File.join(ENV["HOME"], ".titrt")
@@ -136,7 +136,7 @@ class Tit
         YAML.dump(request_token.params, rt)
       end
       File.open(RCFILE, "w") do |rc|
-        YAML.dump({:count => 10}, rc)
+        YAML.dump({:count => 10, :tco => true}, rc)
       end
       tuts "Please visit '#{request_token.authorize_url}'."
       tuts "When you finish, provide your pin with `tit --pin PIN'"
@@ -180,16 +180,19 @@ class Tit
     end
     api_endpoint.concat("&include_entities=true")
     
+    # I'll use this to decode HTML entities.
     coder = HTMLEntities.new
     
     # Parse XML
     xmlbody = @access_token.get(api_endpoint).body
+    
     # Errors
     Nokogiri.XML(xmlbody).xpath("//errors").map do |xml|
       if xml.at_xpath("./error").content == "This application is not allowed to access or delete your direct messages"
         abort("Your OAuth key is not authorized for direct messaging.\nDelete #{TITAT} and run tit without arguments to reauthorize.")
       end
     end
+    
     # no errors - get tits
     if action != :direct_messages
       Nokogiri.XML(xmlbody).xpath("//status").map do |xml|
@@ -199,8 +202,8 @@ class Tit
           :text => xml.xpath("./text").map do |n|
             txt = coder.decode(n.content)
             if not xml.xpath("./entities/urls").nil?
-              xml.xpath("./entities/urls/url").map do |url| 
-                txt.replace_with_expanded_url!(url.xpath("./expanded_url").map { |expurl| expurl.content })
+              xml.xpath("./entities/urls/url").map do |url|
+                txt.replace_with_expanded_url!(url.xpath("./expanded_url").map { |expurl| expurl.content }) unless @prefs[:tco].eql?("TRUE")
               end
             end
             txt
@@ -334,6 +337,15 @@ class Tit
   def update_count(count)
     @prefs[:count] = count.to_i
     @prefs["count"] = count.to_i
+    File.open(RCFILE, "w") do |rc|
+      YAML.dump(@prefs, rc)
+    end
+    exit(0)
+  end
+  
+  def update_tco(tco)
+    @prefs[:tco] = tco
+    @prefs["tco"] = tco
     File.open(RCFILE, "w") do |rc|
       YAML.dump(@prefs, rc)
     end

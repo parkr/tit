@@ -26,14 +26,17 @@ def main
       options[:action] = :public
       unchanged = false
     end
+    
     opts.on("-H", "--home", "Show home timeline (default)") do
       options[:action] = :home
       unchanged = false
     end
+    
     opts.on("-m", "--mentions", "Show mentions timeline") do
       options[:action] = :mentions
       unchanged = false
     end
+    
     opts.on("-u", "--user USERNAME",
             "Show a particular user's timeline") do |user|
       unchanged = false
@@ -41,6 +44,7 @@ def main
       options[:payload] ||= {}
       options[:payload]["user"] = user
     end
+    
     opts.on("-d", "--dm [USERNAME]", "Read direct messages. Send a direct message if USERNAME is set and -t or --tweet accompanies it") do |user|
       unchanged = false
       if not user.nil?
@@ -51,6 +55,7 @@ def main
         options[:action] = :direct_messages
       end
     end
+    
     opts.on("-t", "--tweet [STATUS]", "Update status (required when using -G)") do |status|
       unchanged = false
       if not options[:action].nil? and options[:action].eql?(:new_direct_message)
@@ -61,6 +66,7 @@ def main
         options[:payload]["status"] = status
       end
     end
+    
     opts.on("--pin PIN", ("Set auth pin if this is your first time playing " +
                           "with this tit")) do |pin|
       unchanged = false
@@ -113,6 +119,11 @@ def main
     opts.on_tail("-c", "--count [NUM]", "Set number of statuses you see") do |count|
       unchanged = false
       tit.update_count(count)
+    end
+    
+    opts.on_tail("-o", "--tco TRUE/FALSE", "Tells tit whether to keep the t.co urls") do |tco|
+      unchanged = false
+      tit.update_tco(tco)
     end
     
     opts.on_tail("-h", "--help", "Show this message") do
