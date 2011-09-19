@@ -26,7 +26,7 @@ class String
     replace(replace_with_expanded_url(expanded))
   end
   def replace_with_expanded_url(expanded)
-    replace_uris(/http:\/\/t.co\/[a-zA-Z0-9]{0,7}$/i, expanded)
+    replace_uris(/http:\/\/t.co\/[a-zA-Z0-9]{1,8}$/i, expanded)
   end
   def replace_uris(old, newt)
     split(URI_REGEX).collect do |s|
@@ -91,7 +91,7 @@ end
 Why are you reading the documentation, you cunt?
 =end
 class Tit
-  VERSION = [2, 0, 4]
+  VERSION = [2, 1, 5]
   
   RCFILE = File.join(ENV["HOME"], ".titrc")
   RTFILE = File.join(ENV["HOME"], ".titrt")
@@ -136,7 +136,7 @@ class Tit
         YAML.dump(request_token.params, rt)
       end
       File.open(RCFILE, "w") do |rc|
-        YAML.dump({count: 10}, rc)
+        YAML.dump({:count => 10}, rc)
       end
       tuts "Please visit '#{request_token.authorize_url}'."
       tuts "When you finish, provide your pin with `tit --pin PIN'"
@@ -171,6 +171,7 @@ class Tit
   end
 
   def get_tits(action, payload)
+    # Build the API Endpoint
     api_endpoint = URLS[action]
     if(action == :user_timeline and not payload.nil?)
       api_endpoint.concat("?screen_name=".concat(payload['user'])).concat("&count=#{@prefs[:count]}")
@@ -178,30 +179,53 @@ class Tit
       api_endpoint.concat("?count=#{@prefs[:count]}")
     end
     api_endpoint.concat("&include_entities=true")
+    
     coder = HTMLEntities.new
-    #puts @access_token.get(api_endpoint).body
-    Nokogiri.XML(@access_token.get(api_endpoint).body).xpath("//status").map do |xml|
-      {
-        :username => xml.at_xpath("./user/name").content,
-        :userid => xml.at_xpath("./user/screen_name").content,
-        :text => xml.xpath("./text").map do |n|
-          txt = coder.decode(n.content)
-          if not xml.xpath("./entities/urls").nil?
-            xml.xpath("./entities/urls/url").map do |url| 
-              txt.replace_with_expanded_url! (url.xpath("./expanded_url").map { |expurl| expurl.content })
+    
+    # Parse XML
+    xmlbody = @access_token.get(api_endpoint).body
+    # Errors
+    Nokogiri.XML(xmlbody).xpath("//errors").map do |xml|
+      if xml.at_xpath("./error").content == "This application is not allowed to access or delete your direct messages"
+        abort("Your OAuth key is not authorized for direct messaging.\nDelete #{TITAT} and run tit without arguments to reauthorize.")
+      end
+    end
+    # no errors - get tits
+    if action != :direct_messages
+      Nokogiri.XML(xmlbody).xpath("//status").map do |xml|
+        {
+          :username => xml.at_xpath("./user/name").content,
+          :userid => xml.at_xpath("./user/screen_name").content,
+          :text => xml.xpath("./text").map do |n|
+            txt = coder.decode(n.content)
+            if not xml.xpath("./entities/urls").nil?
+              xml.xpath("./entities/urls/url").map do |url| 
+                txt.replace_with_expanded_url!(url.xpath("./expanded_url").map { |expurl| expurl.content })
+              end
+            end
+            txt
+          end,
+          :timestamp => Time.parse(xml.at_xpath("./created_at").content),
+          :id => xml.at_xpath("./id").content.to_i,
+          :geo => xml.at_xpath("./geo").instance_eval do
+            unless children.empty?
+              n, e = children[1].content.split.map { |s| s.to_f }
+              "#{n.abs}#{n >= 0 ? 'N' : 'S'} #{e.abs}#{e >= 0 ? 'E' : 'W'}"
             end
           end
-          txt
-        end,
-        :timestamp => Time.parse(xml.at_xpath("./created_at").content),
-        :id => xml.at_xpath("./id").content.to_i,
-        :geo => xml.at_xpath("./geo").instance_eval do
-          unless children.empty?
-            n, e = children[1].content.split.map { |s| s.to_f }
-            "#{n.abs}#{n >= 0 ? 'N' : 'S'} #{e.abs}#{e >= 0 ? 'E' : 'W'}"
-          end
-        end
-      }
+        }
+      end
+    else
+      # get the dms
+      Nokogiri.XML(xmlbody).xpath("//direct_message").map do |xml|
+        {
+          :username => xml.at_xpath("./sender/name").content,
+          :userid => xml.at_xpath("./sender_screen_name").content,
+          :text => xml.xpath("./text").map {|n| coder.decode(n.content)},
+          :timestamp => Time.parse(xml.at_xpath("./created_at").content),
+          :id => xml.at_xpath("./id").content.to_i,
+        }
+      end
     end
   end
 
@@ -231,7 +255,14 @@ class Tit
       exit(-1)
     end
     
-    @access_token.post(URLS[:new_direct_message], payload)
+    response = @access_token.post(URLS[:new_direct_message], payload)
+    
+    # Check the response for errors
+    Nokogiri.XML(response).xpath("//hash").map do |xml|
+        if xml.at_xpath("./error")
+          abort("you cannot send a dm to someone who doesn't follow you")
+        end
+    end
   end
 
   def show_tit(status)

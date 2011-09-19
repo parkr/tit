@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'tit'
-
 require 'optparse'
 
 def main
@@ -35,31 +34,31 @@ def main
       options[:action] = :mentions
       unchanged = false
     end
-    opts.on("-u", "--user [USERNAME]",
+    opts.on("-u", "--user USERNAME",
             "Show a particular user's timeline") do |user|
       unchanged = false
       options[:action] = :user_timeline
       options[:payload] ||= {}
       options[:payload]["user"] = user
     end
-    opts.on("-t", "--tweet [STATUS]", "Update status (required when using -G)") do |status|
+    opts.on("-d", "--dm [USERNAME]", "Read direct messages. Send a direct message if USERNAME is set and -t or --tweet accompanies it") do |user|
       unchanged = false
-      options[:action] = :update
-      options[:payload] ||= {}
-      options[:payload]["status"] = status
-    end
-    opts.on("-d", "--dm [USERNAME] [MESSAGE]", "Read direct messages. Send a direct message if USERNAME and MESSAGE are set") do |user, message|
-      "Tit does not presently have access to Twitter's Direct Messaging functionality. This will be rectified soon.".wrapped(@cols-2).each do |l|
-        puts " #{l}"
-      end
-      unchanged = false
-      if not user.nil? and not message.nil?
+      if not user.nil?
         options[:action] = :new_direct_message
         options[:payload] ||= {}
         options[:payload]["screen_name"] = user
-        options[:payload]["text"] = message
       else
         options[:action] = :direct_messages
+      end
+    end
+    opts.on("-t", "--tweet [STATUS]", "Update status (required when using -G)") do |status|
+      unchanged = false
+      if not options[:action].nil? and options[:action].eql?(:new_direct_message)
+        options[:payload]["text"] = status
+      else
+        options[:action] = :update
+        options[:payload] ||= {}
+        options[:payload]["status"] = status
       end
     end
     opts.on("--pin PIN", ("Set auth pin if this is your first time playing " +
@@ -156,7 +155,7 @@ def main
                                                   not options[:notify].nil?)
   end
   if options[:action] == :update
-    tit.abort("need status message") unless options[:payload].include? "status"
+    tit.abort("need status message") unless options[:payload].include? "status" and not options[:payload]["status"].nil?
     tit.abort("can't repeatedly update status") unless options[:wait].nil?
     tit.abort("can't notify when updating status") unless options[:notify].nil?
   end
