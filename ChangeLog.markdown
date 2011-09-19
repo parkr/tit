@@ -1,3 +1,7 @@
+# tit 2.1.7 2011-09-19
+
+* note to self: don't ever code at 2:30am... you fuck shit up
+
 # tit 2.1.6 2011-09-19
 
 * added preference as to whether t.co urls should be replaced with the expanded urls

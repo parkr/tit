@@ -26,6 +26,7 @@ end
 File.open("tit.gemspec2", "w+") do |spec|
   contents = IO.read("tit.gemspec")
   contents.gsub!("version = \"#{version[:old]}\"", "version = \"#{version[:new]}\"")
+  contents.gsub!(/s.date = %q{(\d{4}-\d{2}-\d{2})}/, "s.date = %q{#{Date.today}}")
   spec.write(contents)
   FileUtils.mv "tit.gemspec2", "tit.gemspec"
 end
