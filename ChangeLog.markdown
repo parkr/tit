@@ -1,6 +1,6 @@
 # tit 2.1.5 2011-09-12
 
-* 
+* some bug fixes and code restructuring
 
 # tit 2.1.0 2011-09-10
 
