@@ -160,7 +160,7 @@ def main
   tit.get_access
 
   # check for option errors
-  if Tit::READERS.include? options[:action] and not options[:action].eql?(:user_timeline)
+  if Tit::READERS.include? options[:action] and !options[:action].eql?(:user_timeline)
     tit.abort("cannot provide geotag when reading") unless options[:payload].nil? # should really be checking for options[:payload][:geo] or something
     tit.abort("cannot notify unless polling") if (options[:wait].nil? and
                                                   not options[:notify].nil?)
